@@ -1,35 +1,31 @@
-let candidatos = JSON.parse(localStorage.getItem("candidatos")) || [];
+const dia = localStorage.getItem("treinoDia");
+const hora = localStorage.getItem("treinoHora");
+const btn = document.getElementById("btnTreino");
 
-function salvarCandidato(dados) {
-  candidatos.push(dados);
-  localStorage.setItem("candidatos", JSON.stringify(candidatos));
+if (dia && hora) {
+  btn.innerText = `Treino ${dia} às ${hora} — Confirmar presença`;
+} else {
+  btn.innerText = "Treino ainda não definido";
+  btn.disabled = true;
 }
 
-function carregarCandidatos() {
-  const lista = document.getElementById("lista");
-  const contador = document.getElementById("contador");
-  if (!lista || !contador) return;
+btn.onclick = () => {
+  if (!confirm(`Você concorda com o treino em ${dia} às ${hora}?`)) {
+    alert("Espere o próximo recrutamento.");
+    return;
+  }
 
-  lista.innerHTML = "";
-  contador.innerText = candidatos.length;
+  const candidatos = JSON.parse(localStorage.getItem("candidatos") || "[]");
 
-  candidatos.forEach((c, i) => {
-    const li = document.createElement("li");
-    li.innerHTML = `
-      <strong>${c.nome}</strong> (${c.idade})<br>
-      Discord: ${c.discord}<br>
-      Cargo: ${c.cargo} | Tiro: ${c.tiro} | P1: ${c.p1}<br>
-      <button onclick="excluir(${i})">Excluir</button>
-    `;
-    lista.appendChild(li);
+  candidatos.push({
+    nome: nome.value,
+    idade: idade.value,
+    discord: discord.value,
+    cargo: cargo.value,
+    tiro: tiro.value,
+    p1: p1.value
   });
-}
 
-function excluir(i) {
-  if (!confirm("Excluir candidato?")) return;
-  candidatos.splice(i, 1);
   localStorage.setItem("candidatos", JSON.stringify(candidatos));
-  carregarCandidatos();
-}
-
-document.addEventListener("DOMContentLoaded", carregarCandidatos);
+  alert("Candidatura enviada!");
+};
