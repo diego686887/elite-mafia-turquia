@@ -1,27 +1,24 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-BR">
 <head>
-  <title>Admin</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Área Admin</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div id="login">
-  <h2>Digite sua KEY</h2>
-  <input id="keyInput">
-  <button onclick="entrar()">Entrar</button>
-</div>
+<h1>Área Administrativa</h1>
 
-<div id="painel" style="display:none">
-  <h2>Configurar Treino</h2>
-  <input id="diaTreino" placeholder="Dia (ex: 25/02)">
-  <input id="horaTreino" type="time">
-  <button onclick="salvarTreino()">Salvar</button>
+<label>Dia e horário do treino:</label>
+<input type="text" id="novoHorario" placeholder="Ex: Sexta às 20:00">
+<button onclick="salvarHorario()">Salvar Horário</button>
 
-  <h2>Candidatos (<span id="contador">0</span>)</h2>
-  <ul id="lista"></ul>
-</div>
+<h2>Candidatos</h2>
+<p>Total de candidatos: <strong><span id="contador">0</span></strong></p>
 
-<script src="admin.js"></script>
+<ul id="listaCandidatos"></ul>
+
+<script src="script.js"></script>
 </body>
 </html>
