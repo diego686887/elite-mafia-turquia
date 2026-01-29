@@ -1,9 +1,11 @@
 function gerar() {
-  const key = "ELITE-" + Math.random().toString(36).substr(2, 8).toUpperCase();
+  const nome = adminNome.value.toUpperCase();
+  const rand = Math.random().toString(36).substr(2, 6).toUpperCase();
+  const key = `ELITE-${nome}-${rand}`;
 
-  let keys = JSON.parse(localStorage.getItem("adminKeys")) || [];
+  const keys = JSON.parse(localStorage.getItem("keys") || "[]");
   keys.push(key);
-  localStorage.setItem("adminKeys", JSON.stringify(keys));
+  localStorage.setItem("keys", JSON.stringify(keys));
 
-  document.getElementById("out").innerText = key;
+  resultado.innerText = key;
 }
