@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Área Admin</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Área Administrativa</h1>
+
+<label>Dia e horário do treino:</label>
+<input type="text" id="novoHorario" placeholder="Ex: Sexta às 20:00">
+<button onclick="salvarHorario()">Salvar Horário</button>
+
+<h2>Candidatos</h2>
+<p>Total de candidatos: <strong><span id="contador">0</span></strong></p>
+
+<ul id="listaCandidatos"></ul>
+
+<script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidatura Elite</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Candidatura à Elite</h1>
+
+<form id="formCandidatura">
+    <input type="text" id="nome" placeholder="Nome" required>
+    <input type="number" id="idade" placeholder="Idade" required>
+    <input type="text" id="discord" placeholder="Nome do Discord" required>
+    <input type="text" id="cargo" placeholder="Cargo na Facção" required>
+
+    <label>É bom no tiro?</label>
+    <select id="tiro" required>
+        <option value="">Selecione</option>
+        <option>Sim</option>
+        <option>Não</option>
+    </select>
+
+    <label>Possui P1?</label>
+    <select id="p1" required>
+        <option value="">Selecione</option>
+        <option>Sim</option>
+        <option>Não</option>
+    </select>
+
+    <p id="diaTreino"></p>
+
+    <button type="button" onclick="confirmarHorario()">Confirmar Dia e Horário</button>
+</form>
+
+<script src="script.js"></script>
+</body>
+</html>
