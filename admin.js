@@ -1,4 +1,4 @@
-function loginAdmin() {
+function verificarKey() {
   const keyDigitada = document.getElementById("adminKey").value.trim();
   const keys = JSON.parse(localStorage.getItem("adminKeys")) || [];
 
@@ -10,11 +10,11 @@ function loginAdmin() {
   }
 
   localStorage.setItem("adminLogado", JSON.stringify(admin));
-  mostrarPainel(admin);
+  liberarPainel(admin);
 }
 
-function mostrarPainel(admin) {
-  document.getElementById("login").style.display = "none";
+function liberarPainel(admin) {
+  document.getElementById("keyBox").style.display = "none";
   document.getElementById("painel").style.display = "block";
   document.getElementById("nomeAdmin").innerText = admin.nome;
 }
@@ -24,9 +24,10 @@ function logout() {
   location.reload();
 }
 
+// AUTO LOGIN SE JÁ TIVER KEY
 document.addEventListener("DOMContentLoaded", () => {
   const admin = JSON.parse(localStorage.getItem("adminLogado"));
   if (admin) {
-    mostrarPainel(admin);
+    liberarPainel(admin);
   }
 });
