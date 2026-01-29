@@ -1,28 +1,27 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html>
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Admin</title>
-<link rel="stylesheet" href="style.css">
+  <title>Admin</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- TELA DE KEY -->
-<div id="keyTela">
-  <h2>Coloque sua KEY</h2>
-  <input id="keyInput" placeholder="Digite a KEY">
-  <button onclick="verificarKey()">Entrar</button>
+<div id="login">
+  <h2>Digite sua KEY</h2>
+  <input id="keyInput">
+  <button onclick="entrar()">Entrar</button>
 </div>
 
-<!-- PAINEL ANTIGO -->
 <div id="painel" style="display:none">
-  <h2>Painel Admin</h2>
-  <p>Total de candidatos: <span id="contador">0</span></p>
+  <h2>Configurar Treino</h2>
+  <input id="diaTreino" placeholder="Dia (ex: 25/02)">
+  <input id="horaTreino" type="time">
+  <button onclick="salvarTreino()">Salvar</button>
+
+  <h2>Candidatos (<span id="contador">0</span>)</h2>
   <ul id="lista"></ul>
 </div>
 
-<script src="script.js"></script>
 <script src="admin.js"></script>
 </body>
 </html>
