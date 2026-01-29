@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Candidatura Elite</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<h1>Candidatura - Elite</h1>
+
+<input id="nome" placeholder="Nome">
+<input id="idade" placeholder="Idade">
+<input id="discord" placeholder="Discord">
+<input id="cargo" placeholder="Cargo na facção">
+
+<select id="tiro">
+  <option value="">É bom de tiro?</option>
+  <option>Sim</option>
+  <option>Não</option>
+</select>
+
+<select id="p1">
+  <option value="">Possui P1?</option>
+  <option>Sim</option>
+  <option>Não</option>
+</select>
+
+<p>
+Treinamento: <strong id="dataTreino"></strong>
+</p>
+
+<button onclick="enviar()">Enviar candidatura</button>
+
+<script src="script.js"></script>
+<script>
+document.getElementById("dataTreino").innerText =
+  localStorage.getItem("dataTreino") || "A definir";
+
+function enviar() {
+  if (!confirm("Você concorda com o dia e horário do treinamento?")) {
+    alert("Espere o próximo recrutamento.");
+    return;
+  }
+
+  const dados = {
+    nome: nome.value,
+    idade: idade.value,
+    discord: discord.value,
+    cargo: cargo.value,
+    tiro: tiro.value,
+    p1: p1.value
+  };
+
+  if (!dados.nome || !dados.idade || !dados.discord) {
+    alert("Preencha todos os campos.");
+    return;
+  }
+
+  salvarCandidato(dados);
+  alert("Candidatura enviada.");
+}
+</script>
+
+</body>
+</html>
