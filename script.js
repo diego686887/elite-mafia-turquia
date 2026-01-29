@@ -1,31 +1,60 @@
-const dia = localStorage.getItem("treinoDia");
-const hora = localStorage.getItem("treinoHora");
-const btn = document.getElementById("btnTreino");
+// CARREGAR HORÁRIO
+let horario = localStorage.getItem("horario") || "Sexta-feira às 20:00";
 
-if (dia && hora) {
-  btn.innerText = `Treino ${dia} às ${hora} — Confirmar presença`;
-} else {
-  btn.innerText = "Treino ainda não definido";
-  btn.disabled = true;
+const diaTreino = document.getElementById("diaTreino");
+if (diaTreino) {
+    diaTreino.innerText = "Treino marcado para: " + horario;
 }
 
-btn.onclick = () => {
-  if (!confirm(`Você concorda com o treino em ${dia} às ${hora}?`)) {
-    alert("Espere o próximo recrutamento.");
-    return;
-  }
+// CONFIRMAÇÃO
+function confirmarHorario() {
+    let confirma = confirm(
+        "Você realmente concorda com o dia e horário: " + horario + "?"
+    );
 
-  const candidatos = JSON.parse(localStorage.getItem("candidatos") || "[]");
+    if (!confirma) {
+        alert("Aguarde o próximo recrutamento.");
+        return;
+    }
 
-  candidatos.push({
-    nome: nome.value,
-    idade: idade.value,
-    discord: discord.value,
-    cargo: cargo.value,
-    tiro: tiro.value,
-    p1: p1.value
-  });
+    let candidato = {
+        nome: document.getElementById("nome").value,
+        idade: document.getElementById("idade").value,
+        discord: document.getElementById("discord").value,
+        cargo: document.getElementById("cargo").value,
+        tiro: document.getElementById("tiro").value,
+        p1: document.getElementById("p1").value
+    };
 
-  localStorage.setItem("candidatos", JSON.stringify(candidatos));
-  alert("Candidatura enviada!");
-};
+    let candidatos = JSON.parse(localStorage.getItem("candidatos")) || [];
+    candidatos.push(candidato);
+    localStorage.setItem("candidatos", JSON.stringify(candidatos));
+
+    alert("Candidatura enviada com sucesso!");
+    document.getElementById("formCandidatura").reset();
+}
+
+// ADMIN
+function salvarHorario() {
+    let novo = document.getElementById("novoHorario").value;
+    if (novo.trim() === "") return;
+
+    localStorage.setItem("horario", novo);
+    alert("Horário atualizado!");
+}
+
+// LISTAR CANDIDATOS
+const lista = document.getElementById("listaCandidatos");
+const contador = document.getElementById("contador");
+
+if (lista && contador) {
+    let candidatos = JSON.parse(localStorage.getItem("candidatos")) || [];
+    contador.innerText = candidatos.length;
+
+    candidatos.forEach(c => {
+        let li = document.createElement("li");
+        li.innerText =
+            `Nome: ${c.nome} | Idade: ${c.idade} | Discord: ${c.discord} | Cargo: ${c.cargo} | Tiro: ${c.tiro} | P1: ${c.p1}`;
+        lista.appendChild(li);
+    });
+}
