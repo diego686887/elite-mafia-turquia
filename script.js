@@ -1,10 +1,17 @@
-// CARREGAR HORÁRIO
-let horario = localStorage.getItem("horario") || "Sexta-feira às 20:00";
-
-const diaTreino = document.getElementById("diaTreino");
-if (diaTreino) {
-    diaTreino.innerText = "Treino marcado para: " + horario;
+// CARREGAR HORÁRIO - FUNÇÃO SEPARADA
+function carregarHorario() {
+    let horario = localStorage.getItem("horario") || "Sexta-feira às 20:00";
+    const diaTreino = document.getElementById("diaTreino");
+    
+    if (diaTreino) {
+        diaTreino.innerText = "Treino marcado para: " + horario;
+    }
+    
+    return horario;
 }
+
+// INICIALIZAR HORÁRIO QUANDO A PÁGINA CARREGAR
+let horario = carregarHorario();
 
 // CONFIRMAÇÃO
 function confirmarHorario() {
@@ -24,7 +31,7 @@ function confirmarHorario() {
         cargo: document.getElementById("cargo").value,
         tiro: document.getElementById("tiro").value,
         p1: document.getElementById("p1").value,
-        id: Date.now() // Adiciona um ID único para cada candidato
+        id: Date.now()
     };
 
     let candidatos = JSON.parse(localStorage.getItem("candidatos")) || [];
@@ -35,17 +42,17 @@ function confirmarHorario() {
     document.getElementById("formCandidatura").reset();
 }
 
-// ADMIN
+// ADMIN - SALVAR HORÁRIO
 function salvarHorario() {
     let novo = document.getElementById("novoHorario").value;
     if (novo.trim() === "") return;
 
     localStorage.setItem("horario", novo);
     alert("Horário atualizado!");
-    // Atualizar também na página de candidatura se estiver aberta
-    if (diaTreino) {
-        diaTreino.innerText = "Treino marcado para: " + novo;
-    }
+    
+    // Atualizar a variável global e a exibição
+    horario = novo;
+    carregarHorario();
 }
 
 // FUNÇÃO PARA EXCLUIR CANDIDATO
@@ -55,20 +62,14 @@ function excluirCandidato(id) {
     }
     
     let candidatos = JSON.parse(localStorage.getItem("candidatos")) || [];
-    
-    // Filtra removendo o candidato com o ID correspondente
     candidatos = candidatos.filter(candidato => candidato.id !== id);
-    
-    // Salva a lista atualizada
     localStorage.setItem("candidatos", JSON.stringify(candidatos));
     
-    // Recarrega a lista na tela
     carregarCandidatos();
-    
     alert("Candidato excluído com sucesso!");
 }
 
-// FUNÇÃO PARA CARREGAR CANDIDATOS NA ÁREA ADMIN
+// FUNÇÃO PARA CARREGAR CANDIDATOS
 function carregarCandidatos() {
     const lista = document.getElementById("listaCandidatos");
     const contador = document.getElementById("contador");
@@ -76,11 +77,8 @@ function carregarCandidatos() {
     if (lista && contador) {
         let candidatos = JSON.parse(localStorage.getItem("candidatos")) || [];
         contador.innerText = candidatos.length;
-        
-        // Limpar lista antes de recarregar
         lista.innerHTML = '';
         
-        // Se não houver candidatos
         if (candidatos.length === 0) {
             let li = document.createElement("li");
             li.innerText = "Nenhum candidato cadastrado.";
@@ -89,11 +87,8 @@ function carregarCandidatos() {
             return;
         }
         
-        // Adicionar cada candidato à lista com botão de excluir
         candidatos.forEach(c => {
             let li = document.createElement("li");
-            
-            // Criar conteúdo do candidato
             let conteudo = document.createElement("div");
             conteudo.innerHTML = `
                 <strong>Nome:</strong> ${c.nome} | 
@@ -104,7 +99,6 @@ function carregarCandidatos() {
                 <strong>P1:</strong> ${c.p1}
             `;
             
-            // Criar botão de excluir
             let botaoExcluir = document.createElement("button");
             botaoExcluir.innerText = "Excluir";
             botaoExcluir.style.marginLeft = "10px";
@@ -122,8 +116,23 @@ function carregarCandidatos() {
     }
 }
 
-// CARREGAR CANDIDATOS QUANDO A PÁGINA ADMIN FOR ABERTA
+// INICIALIZAR TUDO QUANDO A PÁGINA CARREGAR
 document.addEventListener('DOMContentLoaded', function() {
+    // Sempre carregar o horário atual
+    carregarHorario();
+    
+    // Se estiver na página admin, carregar candidatos
+    if (document.getElementById('listaCandidatos')) {
+        carregarCandidatos();
+    }
+    
+    // Atualizar horário a cada 2 segundos (para mobile)
+    setInterval(carregarHorario, 2000);
+});
+
+// TAMBÉM INICIALIZAR QUANDO A PÁGINA ESTIVER COMPLETAMENTE CARREGADA
+window.addEventListener('load', function() {
+    carregarHorario();
     if (document.getElementById('listaCandidatos')) {
         carregarCandidatos();
     }
