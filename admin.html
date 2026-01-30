@@ -3,116 +3,60 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Elite Turquia</title>
+    <title>Área Admin</title>
     <link rel="stylesheet" href="estilo.css">
     <style>
+        /* Adicionar apenas este estilo extra */
         .sync-info {
-            background: #2c3e50;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
+            background: #1a1a1a;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
             text-align: center;
-        }
-        
-        .bin-id {
-            font-family: monospace;
-            background: #34495e;
-            padding: 5px 10px;
-            border-radius: 4px;
-            word-break: break-all;
-        }
-        
-        .action-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin: 15px 0;
-        }
-        
-        @media (max-width: 768px) {
-            .action-buttons {
-                grid-template-columns: 1fr;
-            }
+            font-size: 14px;
+            color: #0f0;
         }
     </style>
 </head>
 <body>
 
-<div class="admin-panel">
-    <h1>🛡️ ADMIN - ELITE TURQUIA</h1>
-    
-    <div class="sync-info">
-        <p><strong>ID do Banco Online:</strong></p>
-        <p id="binIdDisplay" class="bin-id">Carregando...</p>
-        <p><small>Sincronização automática a cada 30 segundos</small></p>
-    </div>
-    
-    <h2>⏰ CONFIGURAR HORÁRIO</h2>
-    <input type="text" id="novoHorario" placeholder="Ex: Sábado às 21:00" 
-           value="Sexta-feira às 20:00">
-    
-    <div class="action-buttons">
-        <button onclick="salvarHorario()" style="background: #27ae60;">
-            💾 SALVAR HORÁRIO
-        </button>
-        <button onclick="sincronizarComNuvem()" style="background: #3498db;">
-            🔄 SINCRONIZAR AGORA
-        </button>
-    </div>
-    
-    <h2>👥 CANDIDATOS (<span id="contador">0</span>)</h2>
-    
-    <div class="action-buttons">
-        <button onclick="carregarCandidatos()" style="background: #9b59b6;">
-            📋 ATUALIZAR LISTA
-        </button>
-        <button onclick="exportarCSV()" style="background: #f39c12;">
-            📥 EXPORTAR CSV
-        </button>
-    </div>
-    
-    <ul id="listaCandidatos"></ul>
+<h1>Área Administrativa</h1>
+
+<div class="sync-info" id="syncStatus">
+    🔄 Sincronizando com dispositivos...
 </div>
+
+<label>Dia e horário do treino:</label>
+<input type="text" id="novoHorario" placeholder="Ex: Sexta às 20:00">
+<button onclick="salvarHorario()">Salvar Horário</button>
+
+<h2>Candidatos</h2>
+<p>Total de candidatos: <strong><span id="contador">0</span></strong></p>
+<button onclick="carregarCandidatos()" style="background: #0066cc; margin-bottom: 10px;">
+    ↻ Atualizar Lista
+</button>
+
+<ul id="listaCandidatos"></ul>
 
 <script src="script.js"></script>
 <script>
-// Mostrar Bin ID quando carregar
-document.addEventListener('DOMContentLoaded', function() {
-    const binId = localStorage.getItem('jsonbin_id');
-    const display = document.getElementById('binIdDisplay');
-    if (display) {
-        display.textContent = binId || 'Não configurado ainda';
+// Atualizar status de sincronização
+setInterval(() => {
+    const status = document.getElementById('syncStatus');
+    if (status) {
+        const lastUpdate = localStorage.getItem('ultimaAtualizacao');
+        if (lastUpdate) {
+            const timeAgo = Math.floor((Date.now() - new Date(lastUpdate).getTime()) / 1000);
+            if (timeAgo < 30) {
+                status.innerHTML = '✅ Sincronizado com todos dispositivos';
+                status.style.color = '#0f0';
+            } else {
+                status.innerHTML = '🔄 Última sincronização: ' + Math.floor(timeAgo/60) + ' min atrás';
+                status.style.color = '#ff0';
+            }
+        }
     }
-});
-
-// Exportar para CSV
-async function exportarCSV() {
-    const candidatos = JSON.parse(localStorage.getItem("candidatos") || "[]");
-    
-    if (candidatos.length === 0) {
-        alert("Não há candidatos para exportar!");
-        return;
-    }
-    
-    // Criar cabeçalho CSV
-    let csv = "Nome,Idade,Discord,Cargo,Tiro,P1,Data\n";
-    
-    candidatos.forEach(c => {
-        csv += `"${c.nome}",${c.idade},"${c.discord}","${c.cargo}","${c.tiro}","${c.p1}","${c.dataCadastro}"\n`;
-    });
-    
-    // Criar blob e download
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `candidatos_elite_${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    alert(`Exportado ${candidatos.length} candidatos!`);
-}
+}, 5000);
 </script>
 </body>
 </html>
