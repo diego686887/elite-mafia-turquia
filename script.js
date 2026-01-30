@@ -1,19 +1,29 @@
+// ==================== CONFIG ====================
 const API_KEY = "$2a$10$59L4ur895kSE2c6lxNsB7eBp2T.l55.HgfTBTDSJGyDCCrOFvSe8S";
 const BIN_ID = "697d22b5d0ea881f4094279d";
-const BASE_URL = "https://api.jsonbin.io/v3/b";
 
-// ==================== BUSCAR DADOS ====================
-async function buscarOnline() {
-  const res = await fetch(`${BASE_URL}/${BIN_ID}/latest`, {
-    headers: { "X-Master-Key": API_KEY }
+const URL_GET = `https://api.jsonbin.io/v3/b/${BIN_ID}/latest`;
+const URL_PUT = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+// ELEMENTOS
+const diaTreino = document.getElementById("diaTreino");
+const lista = document.getElementById("listaCandidatos");
+const contador = document.getElementById("contador");
+
+// ==================== FUNÇÕES BASE ====================
+async function buscarDados() {
+  const res = await fetch(URL_GET, {
+    headers: {
+      "X-Master-Key": API_KEY,
+      "Cache-Control": "no-cache"
+    }
   });
   const data = await res.json();
   return data.record;
 }
 
-// ==================== SALVAR DADOS ====================
-async function salvarOnline(dados) {
-  await fetch(`${BASE_URL}/${BIN_ID}`, {
+async function salvarDados(dados) {
+  await fetch(URL_PUT, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
@@ -23,70 +33,69 @@ async function salvarOnline(dados) {
   });
 }
 
-// ==================== INICIAR ====================
-async function iniciarSync() {
-  const dados = await buscarOnline();
+// ==================== ATUALIZAR TELA ====================
+async function atualizarTela() {
+  try {
+    const dados = await buscarDados();
 
-  // horário
-  if (dados.treino && dados.treino.dia && dados.treino.hora) {
-    const texto = `${dados.treino.dia} às ${dados.treino.hora}`;
-    localStorage.setItem("horario", texto);
-    const diaTreino = document.getElementById("diaTreino");
-    if (diaTreino) diaTreino.innerText = "Treino marcado para: " + texto;
+    if (diaTreino) {
+      diaTreino.innerText = "Treino marcado para: " + dados.horario;
+    }
+
+    if (lista && contador) {
+      lista.innerHTML = "";
+      contador.innerText = dados.candidatos.length;
+
+      dados.candidatos.forEach(c => {
+        const li = document.createElement("li");
+        li.innerText =
+          `Nome: ${c.nome} | Idade: ${c.idade} | Discord: ${c.discord} | Cargo: ${c.cargo} | Tiro: ${c.tiro} | P1: ${c.p1}`;
+        lista.appendChild(li);
+      });
+    }
+  } catch (e) {
+    console.error("Erro ao atualizar tela", e);
   }
-
-  // admin lista
-  const lista = document.getElementById("listaCandidatos");
-  const contador = document.getElementById("contador");
-
-  if (lista && contador) {
-    lista.innerHTML = "";
-    contador.innerText = dados.candidaturas.length;
-
-    dados.candidaturas.forEach(c => {
-      const li = document.createElement("li");
-      li.innerText =
-        `Nome: ${c.nome} | Idade: ${c.idade} | Discord: ${c.discord} | Cargo: ${c.cargo} | Tiro: ${c.tiro} | P1: ${c.p1}`;
-      lista.appendChild(li);
-    });
-  }
-}
-
-// ==================== CANDIDATURA ====================
-async function confirmarHorario() {
-  const dados = await buscarOnline();
-
-  const candidato = {
-    nome: nome.value,
-    idade: idade.value,
-    discord: discord.value,
-    cargo: cargo.value,
-    tiro: tiro.value,
-    p1: p1.value
-  };
-
-  dados.candidaturas.push(candidato);
-  await salvarOnline(dados);
-
-  alert("Candidatura enviada!");
-  formCandidatura.reset();
 }
 
 // ==================== ADMIN ====================
 async function salvarHorario() {
   const novo = document.getElementById("novoHorario").value;
-  if (!novo) return;
+  if (!novo.trim()) return;
 
-  const [dia, hora] = novo.split(" ");
-  const dados = await buscarOnline();
+  const dados = await buscarDados();
+  dados.horario = novo;
 
-  dados.treino = {
-    dia: dia,
-    hora: hora || "20:00"
-  };
-
-  await salvarOnline(dados);
+  await salvarDados(dados);
   alert("Horário atualizado!");
+  atualizarTela();
 }
 
-document.addEventListener("DOMContentLoaded", iniciarSync);
+// ==================== CANDIDATURA ====================
+async function confirmarHorario() {
+  const confirma = confirm("Você confirma o horário do treino?");
+  if (!confirma) return;
+
+  const dados = await buscarDados();
+
+  const candidato = {
+    nome: document.getElementById("nome").value,
+    idade: document.getElementById("idade").value,
+    discord: document.getElementById("discord").value,
+    cargo: document.getElementById("cargo").value,
+    tiro: document.getElementById("tiro").value,
+    p1: document.getElementById("p1").value
+  };
+
+  dados.candidatos.push(candidato);
+
+  await salvarDados(dados);
+  alert("Candidatura enviada com sucesso!");
+  document.getElementById("formCandidatura").reset();
+}
+
+// ==================== SYNC AUTOMÁTICO ====================
+document.addEventListener("DOMContentLoaded", () => {
+  atualizarTela();
+  setInterval(atualizarTela, 5000); // força sync no mobile
+});
