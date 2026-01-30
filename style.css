@@ -38,7 +38,6 @@ button, .btn {
     background: darkred;
     color: white;
     cursor: pointer;
-    transition: background 0.3s;
 }
 
 .btn {
@@ -53,21 +52,8 @@ button:hover, .btn:hover {
     background: crimson;
 }
 
-/* Estilo específico para botão de atualizar */
-button[onclick="carregarCandidatos()"] {
-    background: #0066cc;
-    width: auto;
-    display: inline-block;
-    padding: 8px 15px;
-}
-
-button[onclick="carregarCandidatos()"]:hover {
-    background: #0088ff;
-}
-
-/* Estilo para lista de candidatos */
 ul {
-    max-width: 800px;
+    max-width: 600px;
     margin: auto;
     padding: 0;
 }
@@ -75,30 +61,23 @@ ul {
 li {
     list-style: none;
     background: #1a1a1a;
-    margin: 10px 0;
-    padding: 15px;
-    border-radius: 8px;
-    border-left: 4px solid darkred;
+    margin: 6px 0;
+    padding: 10px;
+    border-radius: 6px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
 }
 
-li div {
-    flex-grow: 1;
-}
-
-/* Botão excluir dentro da lista */
-li button {
-    width: auto;
-    padding: 8px 15px;
-    margin: 0;
-    font-size: 14px;
+.btn-excluir {
     background: #8B0000;
+    padding: 5px 10px;
+    font-size: 12px;
+    width: auto;
+    margin-left: 10px;
 }
 
-li button:hover {
+.btn-excluir:hover {
     background: #FF0000;
 }
 
@@ -110,11 +89,12 @@ li button:hover {
     
     li {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
     }
     
-    li button {
+    .btn-excluir {
         width: 100%;
+        margin-left: 0;
         margin-top: 10px;
     }
 }
