@@ -1,77 +1,74 @@
-// ==================== SINCRONIZAÇÃO COM NUVEM ====================
+// ==================== SINCRONIZAÇÃO (NOVA) ====================
 const API_KEY = '$2a$10$59L4ur895kSE2c6lxNsB7eBp2T.l55.HgfTBTDSJGyDCCrOFvSe8S';
-let BIN_ID = null;
+let binId = localStorage.getItem('elite_bin_id');
 
-// Criar bin automaticamente se não existir
-async function criarBin() {
+// Criar banco online automaticamente
+async function criarBancoOnline() {
     try {
         const dados = {
             horario: localStorage.getItem("horario") || "Sexta-feira às 20:00",
             candidatos: JSON.parse(localStorage.getItem("candidatos") || "[]")
         };
         
-        const response = await fetch('https://api.jsonbin.io/v3/b', {
+        const resposta = await fetch('https://api.jsonbin.io/v3/b', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
-                'X-Master-Key': API_KEY,
-                'X-Bin-Name': 'EliteTurquia'
+                'X-Master-Key': API_KEY
             },
             body: JSON.stringify(dados)
         });
         
-        const data = await response.json();
-        BIN_ID = data.metadata.id;
-        localStorage.setItem('jsonbin_id', BIN_ID);
+        const dadosResposta = await resposta.json();
+        binId = dadosResposta.metadata.id;
+        localStorage.setItem('elite_bin_id', binId);
         return true;
-    } catch (error) {
-        console.log("Modo offline - usando dados locais");
+    } catch (erro) {
+        console.log("Modo offline - sem sincronização");
         return false;
     }
 }
 
-// Buscar dados da nuvem
-async function buscarDaNuvem() {
+// Buscar dados online
+async function buscarOnline() {
     try {
-        BIN_ID = localStorage.getItem('jsonbin_id');
-        if (!BIN_ID) return false;
+        if (!binId) return false;
         
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+        const resposta = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
             headers: { 'X-Master-Key': API_KEY }
         });
         
-        const data = await response.json();
-        const record = data.record;
+        const dados = await resposta.json();
+        const registro = dados.record;
         
-        // Atualizar dados locais com os da nuvem
-        if (record.horario) {
-            localStorage.setItem("horario", record.horario);
+        // Mesclar dados: se online tem dados, usa eles
+        if (registro.horario) {
+            localStorage.setItem("horario", registro.horario);
         }
-        if (record.candidatos) {
-            localStorage.setItem("candidatos", JSON.stringify(record.candidatos));
+        if (registro.candidatos) {
+            localStorage.setItem("candidatos", JSON.stringify(registro.candidatos));
         }
         
         return true;
-    } catch (error) {
+    } catch (erro) {
         return false;
     }
 }
 
-// Enviar dados para nuvem
-async function enviarParaNuvem() {
+// Enviar dados online
+async function enviarOnline() {
     try {
-        if (!BIN_ID) {
-            await criarBin();
-            if (!BIN_ID) return false;
+        if (!binId) {
+            const criado = await criarBancoOnline();
+            if (!criado) return false;
         }
         
         const dados = {
             horario: localStorage.getItem("horario") || "Sexta-feira às 20:00",
-            candidatos: JSON.parse(localStorage.getItem("candidatos") || "[]"),
-            atualizadoEm: new Date().toISOString()
+            candidatos: JSON.parse(localStorage.getItem("candidatos") || "[]")
         };
         
-        await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+        await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -81,12 +78,49 @@ async function enviarParaNuvem() {
         });
         
         return true;
-    } catch (error) {
+    } catch (erro) {
         return false;
     }
 }
 
-// ==================== CÓDIGO ORIGINAL (MANTIDO) ====================
+// Iniciar sincronização
+async function iniciarSync() {
+    // Primeiro busca online
+    await buscarOnline();
+    
+    // Atualiza variáveis locais
+    horario = localStorage.getItem("horario") || "Sexta-feira às 20:00";
+    
+    // Atualiza display se existir
+    if (diaTreino) {
+        diaTreino.innerText = "Treino marcado para: " + horario;
+    }
+    
+    // Atualiza lista se for admin
+    if (lista && contador) {
+        let candidatos = JSON.parse(localStorage.getItem("candidatos")) || [];
+        contador.innerText = candidatos.length;
+        lista.innerHTML = '';
+        
+        candidatos.forEach(c => {
+            let li = document.createElement("li");
+            li.innerText =
+                `Nome: ${c.nome} | Idade: ${c.idade} | Discord: ${c.discord} | Cargo: ${c.cargo} | Tiro: ${c.tiro} | P1: ${c.p1}`;
+            lista.appendChild(li);
+        });
+    }
+    
+    // Sincroniza a cada 10 segundos
+    setInterval(async () => {
+        await buscarOnline();
+        horario = localStorage.getItem("horario") || "Sexta-feira às 20:00";
+        if (diaTreino) {
+            diaTreino.innerText = "Treino marcado para: " + horario;
+        }
+    }, 10000);
+}
+
+// ==================== CÓDIGO ORIGINAL (INTACTO) ====================
 // CARREGAR HORÁRIO
 let horario = localStorage.getItem("horario") || "Sexta-feira às 20:00";
 
@@ -112,16 +146,15 @@ function confirmarHorario() {
         discord: document.getElementById("discord").value,
         cargo: document.getElementById("cargo").value,
         tiro: document.getElementById("tiro").value,
-        p1: document.getElementById("p1").value,
-        id: Date.now() // Adiciona um ID único para cada candidato
+        p1: document.getElementById("p1").value
     };
 
     let candidatos = JSON.parse(localStorage.getItem("candidatos")) || [];
     candidatos.push(candidato);
     localStorage.setItem("candidatos", JSON.stringify(candidatos));
     
-    // Enviar para nuvem em segundo plano
-    enviarParaNuvem();
+    // Envia online em segundo plano
+    enviarOnline();
 
     alert("Candidatura enviada com sucesso!");
     document.getElementById("formCandidatura").reset();
@@ -133,17 +166,10 @@ function salvarHorario() {
     if (novo.trim() === "") return;
 
     localStorage.setItem("horario", novo);
-    horario = novo;
-    
-    // Enviar para nuvem
-    enviarParaNuvem();
-    
     alert("Horário atualizado!");
     
-    // Atualizar também na página de candidatura se estiver aberta
-    if (diaTreino) {
-        diaTreino.innerText = "Treino marcado para: " + novo;
-    }
+    // Envia online
+    enviarOnline();
 }
 
 // LISTAR CANDIDATOS
@@ -153,105 +179,15 @@ const contador = document.getElementById("contador");
 if (lista && contador) {
     let candidatos = JSON.parse(localStorage.getItem("candidatos")) || [];
     contador.innerText = candidatos.length;
-    
-    // Limpar lista antes de recarregar
-    lista.innerHTML = '';
 
     candidatos.forEach(c => {
         let li = document.createElement("li");
-        li.innerHTML = `
-            <div>
-                <strong>Nome:</strong> ${c.nome} | 
-                <strong>Idade:</strong> ${c.idade} | 
-                <strong>Discord:</strong> ${c.discord} | 
-                <strong>Cargo:</strong> ${c.cargo} | 
-                <strong>Tiro:</strong> ${c.tiro} | 
-                <strong>P1:</strong> ${c.p1}
-            </div>
-            <button onclick="excluirCandidato(${c.id})" style="
-                background: #8B0000;
-                padding: 5px 10px;
-                font-size: 12px;
-                margin-left: 10px;
-                cursor: pointer;
-            ">
-                Excluir
-            </button>
-        `;
+        li.innerText =
+            `Nome: ${c.nome} | Idade: ${c.idade} | Discord: ${c.discord} | Cargo: ${c.cargo} | Tiro: ${c.tiro} | P1: ${c.p1}`;
         lista.appendChild(li);
     });
 }
 
-// FUNÇÃO PARA EXCLUIR CANDIDATO
-async function excluirCandidato(id) {
-    if (!confirm("Tem certeza que deseja excluir este candidato?")) {
-        return;
-    }
-    
-    let candidatos = JSON.parse(localStorage.getItem("candidatos")) || [];
-    candidatos = candidatos.filter(candidato => candidato.id !== id);
-    localStorage.setItem("candidatos", JSON.stringify(candidatos));
-    
-    // Enviar para nuvem
-    await enviarParaNuvem();
-    
-    // Recarrega a lista na tela
-    location.reload();
-}
-
-// ==================== INICIALIZAR SINCRONIZAÇÃO ====================
-async function iniciarSincronizacao() {
-    // Primeiro: tentar buscar dados da nuvem
-    await buscarDaNuvem();
-    
-    // Atualizar variáveis locais com possíveis dados da nuvem
-    horario = localStorage.getItem("horario") || "Sexta-feira às 20:00";
-    
-    // Atualizar display se existir
-    if (diaTreino) {
-        diaTreino.innerText = "Treino marcado para: " + horario;
-    }
-    
-    // Atualizar lista de candidatos se for admin
-    if (lista && contador) {
-        let candidatos = JSON.parse(localStorage.getItem("candidatos")) || [];
-        contador.innerText = candidatos.length;
-        lista.innerHTML = '';
-        
-        candidatos.forEach(c => {
-            let li = document.createElement("li");
-            li.innerHTML = `
-                <div>
-                    <strong>Nome:</strong> ${c.nome} | 
-                    <strong>Idade:</strong> ${c.idade} | 
-                    <strong>Discord:</strong> ${c.discord} | 
-                    <strong>Cargo:</strong> ${c.cargo} | 
-                    <strong>Tiro:</strong> ${c.tiro} | 
-                    <strong>P1:</strong> ${c.p1}
-                </div>
-                <button onclick="excluirCandidato(${c.id})" style="
-                    background: #8B0000;
-                    padding: 5px 10px;
-                    font-size: 12px;
-                    margin-left: 10px;
-                    cursor: pointer;
-                ">
-                    Excluir
-                </button>
-            `;
-            lista.appendChild(li);
-        });
-    }
-    
-    // Sincronizar a cada 5 segundos
-    setInterval(async () => {
-        await buscarDaNuvem();
-        horario = localStorage.getItem("horario") || "Sexta-feira às 20:00";
-        if (diaTreino) {
-            diaTreino.innerText = "Treino marcado para: " + horario;
-        }
-    }, 5000);
-}
-
-// Iniciar quando a página carregar
-document.addEventListener('DOMContentLoaded', iniciarSincronizacao);
+// ==================== INICIAR TUDO ====================
+// Inicia sincronização quando página carrega
+document.addEventListener('DOMContentLoaded', iniciarSync);
