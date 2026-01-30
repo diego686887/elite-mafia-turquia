@@ -5,6 +5,72 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Elite Mafia - Gerador de Keys</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        .key-display {
+            background-color: #000;
+            border: 2px solid #fff;
+            padding: 20px;
+            margin: 20px 0;
+            font-family: monospace;
+            font-size: 1.2rem;
+            text-align: center;
+            word-break: break-all;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        .key-display:hover {
+            background-color: #111;
+            transform: scale(1.02);
+        }
+        
+        .copy-btn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background-color: #000;
+            color: #fff;
+            border: 1px solid #fff;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        
+        .copy-btn:hover {
+            background-color: #fff;
+            color: #000;
+        }
+        
+        .key-item {
+            background-color: #000;
+            border: 1px solid #fff;
+            padding: 15px;
+            margin: 10px 0;
+            position: relative;
+        }
+        
+        .key-code {
+            font-family: monospace;
+            font-size: 1.1rem;
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #111;
+            border: 1px solid #444;
+        }
+        
+        .copy-success {
+            color: #00ff00;
+            font-weight: bold;
+            animation: fadeOut 2s forwards;
+        }
+        
+        @keyframes fadeOut {
+            0% { opacity: 1; }
+            70% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -29,16 +95,40 @@
                     <input type="text" id="nomeAdmin" placeholder="Nome para identificação">
                 </div>
                 
-                <button onclick="gerarNovaKey()" class="btn">GERAR KEY</button>
+                <div class="form-group">
+                    <label for="diasExpiracao">DIAS PARA EXPIRAR:</label>
+                    <input type="number" id="diasExpiracao" value="30" min="1" max="365">
+                </div>
+                
+                <button onclick="gerarNovaKey()" class="btn">GERAR NOVA KEY</button>
+            </div>
+            
+            <!-- Área para mostrar key gerada -->
+            <div id="novaKeyArea" style="display: none;">
+                <div class="treino-info">
+                    <h3>🔑 NOVA KEY GERADA</h3>
+                    <div id="novaKeyDisplay" class="key-display" onclick="copiarKey(this)">
+                        <span id="keyText"></span>
+                        <button class="copy-btn" onclick="copiarKey(this.parentNode, event)">COPIAR</button>
+                    </div>
+                    <div id="keyInfo"></div>
+                    <p class="warning">⚠️ SALVE ESTA KEY! Ela só será mostrada uma vez.</p>
+                    <button onclick="ocultarKey()" class="btn">OK, ENTENDI</button>
+                </div>
             </div>
             
             <div class="admin-panel">
-                <h3>KEYS GERADAS</h3>
+                <h3>📋 KEYS EXISTENTES</h3>
                 <div id="listaKeys">
                     <p>Carregando keys...</p>
                 </div>
-                <button onclick="carregarKeys()" class="btn">ATUALIZAR LISTA</button>
-                <button onclick="limparKeys()" class="btn" style="background-color: #ff4444;">LIMPAR TODAS</button>
+                
+                <div class="btn-container">
+                    <button onclick="carregarKeys()" class="btn">ATUALIZAR LISTA</button>
+                    <button onclick="exportarKeys()" class="btn">EXPORTAR KEYS</button>
+                    <button onclick="importarKeys()" class="btn">IMPORTAR KEYS</button>
+                    <button onclick="limparKeys()" class="btn" style="background-color: #ff0000; border-color: #ff0000;">LIMPAR TODAS</button>
+                </div>
             </div>
             
             <div class="btn-container">
@@ -48,60 +138,168 @@
         </main>
     </div>
     
+    <!-- Modal para importação -->
+    <div id="importModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <h3>IMPORTAR KEYS</h3>
+            <textarea id="importData" placeholder="Cole o JSON das keys aqui..." rows="10"></textarea>
+            <div class="btn-container">
+                <button onclick="fecharImport()" class="btn">CANCELAR</button>
+                <button onclick="confirmarImport()" class="btn">IMPORTAR</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/keys.js"></script>
     <script>
+        // Sistema de keys melhorado
+        let ultimaKeyGerada = null;
+        
         function gerarNovaKey() {
             const tipo = document.getElementById('tipoKey').value;
             const nome = document.getElementById('nomeAdmin').value || 'Admin';
+            const dias = parseInt(document.getElementById('diasExpiracao').value) || 30;
             
-            // Gerar key aleatória
-            const key = 'ELITE_' + Math.random().toString(36).substr(2, 9).toUpperCase() + '_' + 
-                       Math.random().toString(36).substr(2, 6).toUpperCase();
+            if (!nome.trim()) {
+                alert('Digite um nome para o admin!');
+                return;
+            }
             
-            const deviceId = tipo === 'device' ? localStorage.getItem('deviceId') || gerarDeviceId() : 'all';
-            
-            const novaKey = {
-                key: key,
-                tipo: tipo,
-                deviceId: deviceId,
-                nome: nome,
-                criadaEm: new Date().toLocaleString('pt-BR')
-            };
-            
-            // Salvar no localStorage
-            let keys = JSON.parse(localStorage.getItem('adminKeys')) || [];
-            keys.push(novaKey);
-            localStorage.setItem('adminKeys', JSON.stringify(keys));
+            // Gerar key
+            const keyObj = window.SistemaKeys.gerarKey(tipo, nome, dias);
+            ultimaKeyGerada = keyObj;
             
             // Mostrar key
-            alert(`KEY GERADA:\n${key}\n\nCopie e salve em um local seguro!\nEsta key só será mostrada uma vez.`);
+            document.getElementById('keyText').textContent = keyObj.key;
+            document.getElementById('keyInfo').innerHTML = `
+                <p><strong>Admin:</strong> ${keyObj.nomeAdmin}</p>
+                <p><strong>Tipo:</strong> ${tipo === 'device' ? 'Dispositivo Único' : 'Todos os Dispositivos'}</p>
+                <p><strong>Expira em:</strong> ${new Date(keyObj.expiraEm).toLocaleDateString('pt-BR')}</p>
+                <p><strong>Dispositivo:</strong> ${tipo === 'device' ? keyObj.deviceId : 'Qualquer dispositivo'}</p>
+            `;
             
-            // Limpar campos
+            document.getElementById('novaKeyArea').style.display = 'block';
+            
+            // Scroll para key
+            document.getElementById('novaKeyArea').scrollIntoView({ behavior: 'smooth' });
+            
+            // Limpar campo
             document.getElementById('nomeAdmin').value = '';
+        }
+        
+        function copiarKey(element, event) {
+            if (event) event.stopPropagation();
+            
+            const keyText = element.querySelector('span')?.textContent || element.textContent;
+            
+            // Usar Clipboard API moderna
+            navigator.clipboard.writeText(keyText).then(() => {
+                // Mostrar mensagem de sucesso
+                const successMsg = document.createElement('div');
+                successMsg.className = 'copy-success';
+                successMsg.textContent = '✓ KEY COPIADA!';
+                successMsg.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background-color: rgba(0, 0, 0, 0.9);
+                    padding: 10px 20px;
+                    border: 2px solid #00ff00;
+                    z-index: 100;
+                `;
+                
+                element.style.position = 'relative';
+                element.appendChild(successMsg);
+                
+                // Remover mensagem após 2 segundos
+                setTimeout(() => {
+                    successMsg.remove();
+                }, 2000);
+                
+                // Feedback visual
+                element.style.borderColor = '#00ff00';
+                element.style.boxShadow = '0 0 10px #00ff00';
+                
+                setTimeout(() => {
+                    element.style.borderColor = '#fff';
+                    element.style.boxShadow = 'none';
+                }, 1000);
+                
+                console.log('Key copiada:', keyText);
+            }).catch(err => {
+                // Fallback para método antigo
+                console.log('Clipboard API falhou, usando fallback');
+                copiarKeyFallback(keyText);
+            });
+        }
+        
+        function copiarKeyFallback(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            
+            try {
+                document.execCommand('copy');
+                alert('✓ KEY COPIADA PARA A ÁREA DE TRANSFERÊNCIA!');
+            } catch (err) {
+                alert('❌ Não foi possível copiar a key. Copie manualmente:\n\n' + text);
+            }
+            
+            document.body.removeChild(textarea);
+        }
+        
+        function ocultarKey() {
+            document.getElementById('novaKeyArea').style.display = 'none';
             carregarKeys();
         }
         
-        function gerarDeviceId() {
-            const id = 'device_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('deviceId', id);
-            return id;
-        }
-        
         function carregarKeys() {
-            const keys = JSON.parse(localStorage.getItem('adminKeys')) || [];
+            const keys = window.SistemaKeys.listarKeys('ativas');
             const lista = document.getElementById('listaKeys');
             
             if (keys.length === 0) {
-                lista.innerHTML = '<p>Nenhuma key gerada ainda.</p>';
+                lista.innerHTML = '<p>Nenhuma key ativa encontrada.</p>';
                 return;
             }
             
             let html = '';
-            keys.forEach((k, index) => {
+            keys.forEach((key, index) => {
+                const expiracao = window.SistemaKeys.formatarDataExpiracao(key.expiraEm);
+                const tipo = key.tipo === 'device' ? 'Dispositivo Único' : 'Todos';
+                const status = key.ativa ? '✅ ATIVA' : '❌ INATIVA';
+                
                 html += `
-                    <div class="candidato-item">
-                        <strong>Key ${index + 1}:</strong> ${k.key.substring(0, 8)}...<br>
-                        Admin: ${k.nome} | Tipo: ${k.tipo === 'device' ? 'Dispositivo Único' : 'Todos'}<br>
-                        Criada: ${k.criadaEm}
+                    <div class="key-item">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${key.nomeAdmin}</strong> - ${tipo}
+                                <br>
+                                <small>Criada: ${new Date(key.criadaEm).toLocaleDateString('pt-BR')}</small>
+                            </div>
+                            <div style="text-align: right;">
+                                ${status}
+                                <br>
+                                <small>${expiracao}</small>
+                            </div>
+                        </div>
+                        
+                        <div class="key-code" onclick="copiarKey(this)">
+                            ${key.key}
+                            <button class="copy-btn" onclick="copiarKey(this.parentNode, event)">COPIAR</button>
+                        </div>
+                        
+                        <div style="font-size: 0.9rem; margin-top: 10px;">
+                            <span style="color: #888;">Usos: ${key.usos || 0}</span>
+                            ${key.ultimoUso ? `<span style="color: #888; margin-left: 15px;">Último uso: ${new Date(key.ultimoUso).toLocaleDateString('pt-BR')}</span>` : ''}
+                        </div>
+                        
+                        <button onclick="revogarKey('${key.key}')" style="background-color: #ff0000; color: white; border: 1px solid #ff0000; padding: 5px 10px; margin-top: 10px; cursor: pointer;">
+                            REVOGAR
+                        </button>
                     </div>
                 `;
             });
@@ -109,16 +307,76 @@
             lista.innerHTML = html;
         }
         
-        function limparKeys() {
-            if (confirm('TEM CERTEZA QUE DESEJA APAGAR TODAS AS KEYS?\nIsso removerá o acesso de todos os admins!')) {
-                localStorage.removeItem('adminKeys');
-                alert('Todas as keys foram removidas!');
+        function revogarKey(key) {
+            if (confirm(`Tem certeza que deseja revogar a key?\n\n${key}`)) {
+                if (window.SistemaKeys.revogarKey(key)) {
+                    alert('Key revogada com sucesso!');
+                    carregarKeys();
+                }
+            }
+        }
+        
+        function exportarKeys() {
+            const dados = window.SistemaKeys.exportarKeys();
+            const blob = new Blob([dados], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `keys_elite_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            alert('Keys exportadas com sucesso!');
+        }
+        
+        function importarKeys() {
+            document.getElementById('importModal').style.display = 'flex';
+        }
+        
+        function fecharImport() {
+            document.getElementById('importModal').style.display = 'none';
+            document.getElementById('importData').value = '';
+        }
+        
+        function confirmarImport() {
+            const dados = document.getElementById('importData').value;
+            
+            if (!dados.trim()) {
+                alert('Cole os dados das keys no formato JSON!');
+                return;
+            }
+            
+            const resultado = window.SistemaKeys.importarKeys(dados);
+            
+            if (resultado.sucesso) {
+                alert(`✅ ${resultado.importadas} keys importadas com sucesso!\nTotal: ${resultado.total} keys no sistema.`);
+                fecharImport();
                 carregarKeys();
+            } else {
+                alert('❌ Erro ao importar keys. Verifique o formato do arquivo.');
+            }
+        }
+        
+        function limparKeys() {
+            if (confirm('⚠️ ATENÇÃO!\n\nIsso removerá TODAS as keys permanentemente!\n\nDepois disso, nenhum admin conseguirá acessar o sistema até gerar novas keys.\n\nTEM CERTEZA?')) {
+                if (window.SistemaKeys.limparTodasKeys()) {
+                    alert('Todas as keys foram removidas!');
+                    carregarKeys();
+                }
             }
         }
         
         // Carregar keys ao abrir a página
-        window.onload = carregarKeys;
+        window.onload = function() {
+            carregarKeys();
+            
+            // Adicionar listener para tecla ESC no modal
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    fecharImport();
+                }
+            });
+        };
     </script>
 </body>
 </html>
