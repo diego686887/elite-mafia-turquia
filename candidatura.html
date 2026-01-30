@@ -3,97 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Candidatura - Elite Turquia</title>
+    <title>Candidatura Elite</title>
     <link rel="stylesheet" href="estilo.css">
-    <style>
-        .sync-badge {
-            position: fixed;
-            bottom: 10px;
-            right: 10px;
-            background: #2c3e50;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 12px;
-            z-index: 100;
-        }
-    </style>
 </head>
 <body>
 
-<h1>📋 CANDIDATURA À ELITE</h1>
-
-<div style="background: #1a1a1a; padding: 20px; border-radius: 10px; margin: 20px 0; text-align: center;">
-    <h3>⏰ HORÁRIO DO TREINO</h3>
-    <div id="diaTreino" style="font-size: 1.3em; color: #ffcc00; padding: 15px;">
-        Carregando...
-    </div>
-    <button onclick="atualizarDisplayHorario(); alert('Horário atualizado!')" 
-            style="background: #444; padding: 8px 15px; margin-top: 10px;">
-        🔁 ATUALIZAR
-    </button>
-</div>
+<h1>Candidatura à Elite</h1>
 
 <form id="formCandidatura">
-    <h3>👤 DADOS PESSOAIS</h3>
-    
-    <input type="text" id="nome" placeholder="Nome completo" required>
-    <input type="number" id="idade" placeholder="Idade" min="16" max="60" required>
-    <input type="text" id="discord" placeholder="Discord (usuário#0000)" required>
-    <input type="text" id="cargo" placeholder="Cargo atual na facção" required>
-    
-    <h3 style="margin-top: 30px;">🎯 HABILIDADES</h3>
-    
-    <select id="tiro" required style="margin-bottom: 15px;">
-        <option value="">Nível de Tiro</option>
-        <option>Iniciante</option>
-        <option>Intermediário</option>
-        <option>Avançado</option>
-        <option>Expert</option>
-    </select>
-    
-    <select id="p1" required>
-        <option value="">Possui P1?</option>
+    <input type="text" id="nome" placeholder="Nome" required>
+    <input type="number" id="idade" placeholder="Idade" required>
+    <input type="text" id="discord" placeholder="Nome do Discord" required>
+    <input type="text" id="cargo" placeholder="Cargo na Facção" required>
+
+    <label>É bom no tiro?</label>
+    <select id="tiro" required>
+        <option value="">Selecione</option>
         <option>Sim</option>
         <option>Não</option>
     </select>
-    
-    <button type="button" onclick="confirmarHorario()" 
-            style="background: linear-gradient(to right, #e74c3c, #c0392b); 
-                   padding: 15px; margin-top: 30px; font-size: 1.1em;">
-        🚀 ENVIAR CANDIDATURA
-    </button>
-    
-    <p style="text-align: center; margin-top: 20px; color: #888; font-size: 0.9em;">
-        Ao enviar, você confirma que está disponível no horário acima.
-    </p>
+
+    <label>Possui P1?</label>
+    <select id="p1" required>
+        <option value="">Selecione</option>
+        <option>Sim</option>
+        <option>Não</option>
+    </select>
+
+    <p id="diaTreino"></p>
+
+    <button type="button" onclick="confirmarHorario()">Confirmar Dia e Horário</button>
 </form>
 
-<div class="sync-badge" id="syncStatus">🔄 Sincronizando...</div>
-
 <script src="script.js"></script>
-<script>
-// Atualizar badge de sincronização
-setInterval(() => {
-    const lastSync = localStorage.getItem('ultimaAtualizacao');
-    const badge = document.getElementById('syncStatus');
-    if (badge && lastSync) {
-        const time = new Date(lastSync);
-        const now = new Date();
-        const diff = Math.floor((now - time) / 1000 / 60); // minutos
-        
-        if (diff < 2) {
-            badge.innerHTML = '✅ Sincronizado';
-            badge.style.background = '#27ae60';
-        } else if (diff < 5) {
-            badge.innerHTML = '🔄 Recente';
-            badge.style.background = '#f39c12';
-        } else {
-            badge.innerHTML = '⚠️ Atrasado';
-            badge.style.background = '#e74c3c';
-        }
-    }
-}, 10000);
-</script>
 </body>
 </html>
