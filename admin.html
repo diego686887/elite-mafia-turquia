@@ -1,183 +1,97 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Mafia - Área Admin</title>
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>🔱 ÁREA ADMINISTRATIVA</h1>
-        </header>
-        
-        <main class="content">
-            <div id="loginAdmin" style="display: block;">
-                <h2>ACESSO RESTRITO</h2>
-                <p>Digite a key de administração:</p>
-                
-                <div class="form-group">
-                    <input type="password" id="keyAdmin" placeholder="Digite a key de acesso">
-                </div>
-                
-                <div class="btn-container">
-                    <button onclick="validarKey()" class="btn">ACESSAR</button>
-                    <a href="index.html" class="btn">VOLTAR</a>
-                </div>
-                
-                <p class="warning">⚠️ A key é válida apenas para este dispositivo!</p>
-            </div>
-            
-            <div id="painelAdmin" style="display: none;">
-                <h2>PAINEL DE CONTROLE</h2>
-                
-                <div class="admin-panel">
-                    <h3>📅 AGENDAR TREINO</h3>
-                    <div class="form-group">
-                        <label for="novaData">NOVA DATA:</label>
-                        <input type="date" id="novaData">
-                    </div>
-                    <div class="form-group">
-                        <label for="novaHora">NOVO HORÁRIO:</label>
-                        <input type="time" id="novaHora">
-                    </div>
-                    <button onclick="atualizarTreino()" class="btn">ATUALIZAR TREINO</button>
-                </div>
-                
-                <div class="admin-panel">
-                    <h3>📋 CANDIDATURAS RECENTES</h3>
-                    <div id="listaCandidaturas">
-                        <p>Carregando candidaturas...</p>
-                    </div>
-                    <button onclick="carregarCandidaturas()" class="btn">ATUALIZAR LISTA</button>
-                    <button onclick="exportarCandidaturas()" class="btn">EXPORTAR DADOS</button>
-                </div>
-                
-                <div class="btn-container">
-                    <button onclick="sairAdmin()" class="btn">SAIR</button>
-                    <a href="gerador_keys.html" class="btn">GERAR KEYS</a>
-                </div>
-            </div>
-        </main>
+<!-- No admin.html, atualize a parte do login: -->
+<div id="loginAdmin" style="display: block;">
+    <h2>🔐 ACESSO RESTRITO</h2>
+    <p>Digite a key de administração:</p>
+    
+    <div class="form-group">
+        <input type="text" id="keyAdmin" placeholder="Digite a key de acesso (formato: ELITE_XXXXX_XXXXX)" 
+               style="font-family: monospace; text-transform: uppercase; letter-spacing: 1px;">
     </div>
     
-    <script src="js/admin.js"></script>
-    <script>
-        // Sistema de validação de key
-        function validarKey() {
-            const key = document.getElementById('keyAdmin').value;
-            
-            // Verificar se é uma key válida
-            const keysValidas = JSON.parse(localStorage.getItem('adminKeys')) || [];
-            const deviceId = localStorage.getItem('deviceId') || gerarDeviceId();
-            
-            // Verificar se a key está na lista E se é para este dispositivo
-            const keyValida = keysValidas.find(k => 
-                k.key === key && 
-                (k.deviceId === deviceId || k.deviceId === 'all')
-            );
-            
-            if (keyValida) {
-                // Salvar sessão admin
-                localStorage.setItem('adminLogged', 'true');
-                document.getElementById('loginAdmin').style.display = 'none';
-                document.getElementById('painelAdmin').style.display = 'block';
-                carregarCandidaturas();
-            } else {
-                alert('KEY INVÁLIDA OU NÃO AUTORIZADA PARA ESTE DISPOSITIVO!');
-            }
-        }
+    <div id="keyFeedback" style="margin: 10px 0; min-height: 20px;"></div>
+    
+    <div class="btn-container">
+        <button onclick="validarKey()" class="btn">🔑 ACESSAR SISTEMA</button>
+        <a href="gerador_keys.html" class="btn">🗝️ GERAR KEY</a>
+        <a href="index.html" class="btn">🏠 VOLTAR</a>
+    </div>
+    
+    <div class="warning" style="margin-top: 20px; padding: 10px;">
+        <strong>⚠️ INFORMAÇÕES IMPORTANTES:</strong>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+            <li>A key é válida apenas para este dispositivo</li>
+            <li>Cada key tem data de expiração</li>
+            <li>Perdeu a key? Gere uma nova</li>
+            <li>Não compartilhe sua key com ninguém</li>
+        </ul>
+    </div>
+</div>
+
+<script>
+// Função melhorada de validação
+function validarKey() {
+    const keyInput = document.getElementById('keyAdmin');
+    const key = keyInput.value.trim().toUpperCase();
+    const feedback = document.getElementById('keyFeedback');
+    
+    // Limpar feedback anterior
+    feedback.innerHTML = '';
+    feedback.style.color = '';
+    
+    if (!key) {
+        feedback.innerHTML = '❌ Digite uma key!';
+        feedback.style.color = '#ff0000';
+        keyInput.focus();
+        return;
+    }
+    
+    // Validar formato básico
+    if (!key.startsWith('ELITE_')) {
+        feedback.innerHTML = '❌ Formato inválido! A key deve começar com ELITE_';
+        feedback.style.color = '#ff0000';
+        return;
+    }
+    
+    // Mostrar loading
+    feedback.innerHTML = '⏳ Validando key...';
+    feedback.style.color = '#ffff00';
+    
+    // Simular delay de validação
+    setTimeout(() => {
+        const resultado = window.SistemaKeys.validarKey(key);
         
-        function gerarDeviceId() {
-            const id = 'device_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('deviceId', id);
-            return id;
+        if (resultado.valida) {
+            feedback.innerHTML = '✅ Key válida! Acessando sistema...';
+            feedback.style.color = '#00ff00';
+            
+            // Salvar sessão
+            localStorage.setItem('adminSession', JSON.stringify({
+                key: key,
+                validadoEm: new Date().toISOString(),
+                admin: resultado.keyObj.nomeAdmin,
+                deviceId: window.SistemaKeys.deviceId
+            }));
+            
+            localStorage.setItem('adminLogged', 'true');
+            
+            // Redirecionar após breve delay
+            setTimeout(() => {
+                window.location.href = 'admin.html?logged=true';
+            }, 1000);
+            
+        } else {
+            feedback.innerHTML = `❌ ${resultado.motivo}`;
+            feedback.style.color = '#ff0000';
+            
+            // Feedback visual no input
+            keyInput.style.borderColor = '#ff0000';
+            keyInput.style.boxShadow = '0 0 10px rgba(255,0,0,0.5)';
+            
+            setTimeout(() => {
+                keyInput.style.borderColor = '#fff';
+                keyInput.style.boxShadow = 'none';
+            }, 2000);
         }
-        
-        // Verificar se já está logado
-        window.onload = function() {
-            if (localStorage.getItem('adminLogged') === 'true') {
-                document.getElementById('loginAdmin').style.display = 'none';
-                document.getElementById('painelAdmin').style.display = 'block';
-                carregarCandidaturas();
-            }
-        };
-        
-        function carregarCandidaturas() {
-            const candidaturas = JSON.parse(localStorage.getItem('candidaturas')) || [];
-            const lista = document.getElementById('listaCandidaturas');
-            
-            if (candidaturas.length === 0) {
-                lista.innerHTML = '<p>Nenhuma candidatura encontrada.</p>';
-                return;
-            }
-            
-            let html = '';
-            candidaturas.forEach((c, index) => {
-                html += `
-                    <div class="candidato-item">
-                        <strong>${c.nome}</strong> (${c.idade} anos)<br>
-                        Discord: ${c.discord} | Roblox: ${c.roblox}<br>
-                        P1: ${c.p1} | Tiros: ${c.tiros}<br>
-                        Data: ${c.dataCandidatura}
-                    </div>
-                `;
-            });
-            
-            lista.innerHTML = html;
-        }
-        
-        function atualizarTreino() {
-            const data = document.getElementById('novaData').value;
-            const hora = document.getElementById('novaHora').value;
-            
-            if (!data || !hora) {
-                alert('Preencha data e hora!');
-                return;
-            }
-            
-            // Formatando data
-            const dataFormatada = new Date(data + 'T' + hora).toLocaleDateString('pt-BR');
-            const horaFormatada = new Date(data + 'T' + hora).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
-            
-            const treino = {
-                data: dataFormatada,
-                hora: horaFormatada,
-                atualizadoEm: new Date().toLocaleString('pt-BR')
-            };
-            
-            localStorage.setItem('treinoData', JSON.stringify(treino));
-            alert('Treino atualizado com sucesso!');
-            
-            // Sincronizar com outros dispositivos (simulação)
-            if (localStorage.getItem('syncEnabled') === 'true') {
-                sincronizarTreino(treino);
-            }
-        }
-        
-        function sincronizarTreino(treino) {
-            // Em um sistema real, aqui seria uma API
-            // Por enquanto, apenas log
-            console.log('Sincronizando treino:', treino);
-        }
-        
-        function exportarCandidaturas() {
-            const candidaturas = JSON.parse(localStorage.getItem('candidaturas')) || [];
-            const dados = JSON.stringify(candidaturas, null, 2);
-            
-            const blob = new Blob([dados], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'candidaturas_elite.json';
-            a.click();
-        }
-        
-        function sairAdmin() {
-            localStorage.removeItem('adminLogged');
-            location.reload();
-        }
-    </script>
-</body>
-</html>
+    }, 800);
+}
+</script>
