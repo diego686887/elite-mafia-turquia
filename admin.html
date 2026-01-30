@@ -14,12 +14,33 @@
 <input type="text" id="novoHorario" placeholder="Ex: Sexta às 20:00">
 <button onclick="salvarHorario()">Salvar Horário</button>
 
+<button onclick="testarHorario()" style="background: #008800; margin-top: 5px;">
+    🔄 Testar Atualização
+</button>
+
 <h2>Candidatos</h2>
+<p>Horário atual: <span id="horarioAtual" style="color: yellow;"></span></p>
 <p>Total de candidatos: <strong><span id="contador">0</span></strong></p>
-<button onclick="carregarCandidatos()" style="background: #0066cc; margin-bottom: 10px;">↻ Atualizar Lista</button>
+<button onclick="carregarCandidatos()" style="background: #0066cc; margin-bottom: 10px;">
+    ↻ Atualizar Lista
+</button>
 
 <ul id="listaCandidatos"></ul>
 
 <script src="script.js"></script>
+
+<script>
+// Função de teste para verificar se o horário está atualizando
+function testarHorario() {
+    let horario = localStorage.getItem("horario") || "Sexta-feira às 20:00";
+    document.getElementById("horarioAtual").innerText = horario;
+    alert("Horário no localStorage: " + horario);
+    
+    // Forçar atualização na página de candidatura
+    if (window.opener && !window.opener.closed) {
+        window.opener.carregarHorario();
+    }
+}
+</script>
 </body>
 </html>
