@@ -1,0 +1,388 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #000;
+    color: #fff;
+    min-height: 100vh;
+    line-height: 1.6;
+    background-image: 
+        radial-gradient(circle at 20% 30%, rgba(40, 40, 40, 0.8) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(30, 30, 30, 0.6) 0%, transparent 50%);
+    background-attachment: fixed;
+}
+
+.container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+    animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+header {
+    text-align: center;
+    padding: 30px 0;
+    border-bottom: 3px solid #fff;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+}
+
+header::after {
+    content: '🔱';
+    position: absolute;
+    font-size: 3rem;
+    opacity: 0.1;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+header::before {
+    content: '🔱';
+    position: absolute;
+    font-size: 3rem;
+    opacity: 0.1;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+h1 {
+    font-size: 2.8rem;
+    color: #fff;
+    text-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 1;
+}
+
+h2 {
+    color: #fff;
+    margin-bottom: 25px;
+    font-size: 2rem;
+    border-bottom: 2px solid #444;
+    padding-bottom: 10px;
+}
+
+h3 {
+    color: #fff;
+    margin: 20px 0 15px 0;
+    font-size: 1.5rem;
+}
+
+.content {
+    background-color: rgba(15, 15, 15, 0.95);
+    padding: 40px;
+    border-radius: 15px;
+    border: 1px solid #333;
+    margin-bottom: 40px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+}
+
+p {
+    margin-bottom: 20px;
+    font-size: 1.15rem;
+    line-height: 1.8;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #fff;
+    font-size: 1.1rem;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 15px;
+    background-color: #111;
+    border: 2px solid #444;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 1.1rem;
+    transition: all 0.3s;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #fff;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+input::placeholder, textarea::placeholder {
+    color: #888;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.btn {
+    display: inline-block;
+    padding: 15px 35px;
+    background-color: transparent;
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    transition: all 0.3s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: #fff;
+    transition: all 0.4s;
+    z-index: -1;
+}
+
+.btn:hover {
+    color: #000;
+}
+
+.btn:hover::before {
+    left: 0;
+}
+
+.btn-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 40px;
+    flex-wrap: wrap;
+}
+
+.radio-group {
+    display: flex;
+    gap: 30px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 10px 20px;
+    background-color: #111;
+    border-radius: 8px;
+    border: 2px solid #444;
+    transition: all 0.3s;
+}
+
+.radio-option:hover {
+    border-color: #fff;
+}
+
+.radio-option input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #fff;
+}
+
+.treino-info {
+    background: linear-gradient(135deg, #111 0%, #222 100%);
+    padding: 25px;
+    border-radius: 10px;
+    margin: 25px 0;
+    text-align: center;
+    border: 2px solid #fff;
+    position: relative;
+    overflow: hidden;
+}
+
+.treino-info::before {
+    content: '⚔️';
+    position: absolute;
+    font-size: 4rem;
+    opacity: 0.1;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.admin-panel {
+    background-color: #111;
+    padding: 25px;
+    border-radius: 10px;
+    margin-top: 25px;
+    border: 2px solid #444;
+}
+
+.candidato-item {
+    background: linear-gradient(135deg, #222 0%, #333 100%);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border-left: 5px solid #fff;
+    transition: transform 0.3s;
+}
+
+.candidato-item:hover {
+    transform: translateX(5px);
+}
+
+.candidato-item strong {
+    color: #fff;
+    font-size: 1.2rem;
+    display: block;
+    margin-bottom: 5px;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.modal-content {
+    background: linear-gradient(135deg, #000 0%, #111 100%);
+    padding: 50px;
+    border-radius: 15px;
+    border: 3px solid #fff;
+    max-width: 600px;
+    width: 90%;
+    text-align: center;
+    position: relative;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+}
+
+.modal-content::before {
+    content: '⚠️';
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 20px;
+}
+
+.warning {
+    color: #ff4444;
+    font-weight: bold;
+    margin: 15px 0;
+    padding: 10px;
+    background-color: rgba(255, 68, 68, 0.1);
+    border-radius: 5px;
+    border-left: 4px solid #ff4444;
+}
+
+.success {
+    color: #44ff44;
+    font-weight: bold;
+    margin: 15px 0;
+    padding: 10px;
+    background-color: rgba(68, 255, 68, 0.1);
+    border-radius: 5px;
+    border-left: 4px solid #44ff44;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+    .container {
+        padding: 10px;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    h2 {
+        font-size: 1.6rem;
+    }
+    
+    .content {
+        padding: 20px;
+    }
+    
+    .btn-container {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+    
+    .radio-group {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    header::before,
+    header::after {
+        display: none;
+    }
+    
+    .treino-info::before {
+        font-size: 2rem;
+    }
+}
+
+@media (max-width: 480px) {
+    h1 {
+        font-size: 1.8rem;
+    }
+    
+    .modal-content {
+        padding: 30px 20px;
+    }
+    
+    input, select, textarea {
+        padding: 12px;
+    }
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: #111;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #666;
+}

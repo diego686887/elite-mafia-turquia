@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Mafia - Gerador de Keys</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔱 GERADOR DE KEYS ADMIN</h1>
+        </header>
+        
+        <main class="content">
+            <h2>GERAR NOVAS KEYS DE ACESSO</h2>
+            
+            <div class="admin-panel">
+                <div class="form-group">
+                    <label for="tipoKey">TIPO DE ACESSO:</label>
+                    <select id="tipoKey">
+                        <option value="device">APENAS ESTE DISPOSITIVO</option>
+                        <option value="all">TODOS OS DISPOSITIVOS</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nomeAdmin">NOME DO ADMIN:</label>
+                    <input type="text" id="nomeAdmin" placeholder="Nome para identificação">
+                </div>
+                
+                <button onclick="gerarNovaKey()" class="btn">GERAR KEY</button>
+            </div>
+            
+            <div class="admin-panel">
+                <h3>KEYS GERADAS</h3>
+                <div id="listaKeys">
+                    <p>Carregando keys...</p>
+                </div>
+                <button onclick="carregarKeys()" class="btn">ATUALIZAR LISTA</button>
+                <button onclick="limparKeys()" class="btn" style="background-color: #ff4444;">LIMPAR TODAS</button>
+            </div>
+            
+            <div class="btn-container">
+                <a href="admin.html" class="btn">VOLTAR AO ADMIN</a>
+                <a href="index.html" class="btn">INÍCIO</a>
+            </div>
+        </main>
+    </div>
+    
+    <script>
+        function gerarNovaKey() {
+            const tipo = document.getElementById('tipoKey').value;
+            const nome = document.getElementById('nomeAdmin').value || 'Admin';
+            
+            // Gerar key aleatória
+            const key = 'ELITE_' + Math.random().toString(36).substr(2, 9).toUpperCase() + '_' + 
+                       Math.random().toString(36).substr(2, 6).toUpperCase();
+            
+            const deviceId = tipo === 'device' ? localStorage.getItem('deviceId') || gerarDeviceId() : 'all';
+            
+            const novaKey = {
+                key: key,
+                tipo: tipo,
+                deviceId: deviceId,
+                nome: nome,
+                criadaEm: new Date().toLocaleString('pt-BR')
+            };
+            
+            // Salvar no localStorage
+            let keys = JSON.parse(localStorage.getItem('adminKeys')) || [];
+            keys.push(novaKey);
+            localStorage.setItem('adminKeys', JSON.stringify(keys));
+            
+            // Mostrar key
+            alert(`KEY GERADA:\n${key}\n\nCopie e salve em um local seguro!\nEsta key só será mostrada uma vez.`);
+            
+            // Limpar campos
+            document.getElementById('nomeAdmin').value = '';
+            carregarKeys();
+        }
+        
+        function gerarDeviceId() {
+            const id = 'device_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('deviceId', id);
+            return id;
+        }
+        
+        function carregarKeys() {
+            const keys = JSON.parse(localStorage.getItem('adminKeys')) || [];
+            const lista = document.getElementById('listaKeys');
+            
+            if (keys.length === 0) {
+                lista.innerHTML = '<p>Nenhuma key gerada ainda.</p>';
+                return;
+            }
+            
+            let html = '';
+            keys.forEach((k, index) => {
+                html += `
+                    <div class="candidato-item">
+                        <strong>Key ${index + 1}:</strong> ${k.key.substring(0, 8)}...<br>
+                        Admin: ${k.nome} | Tipo: ${k.tipo === 'device' ? 'Dispositivo Único' : 'Todos'}<br>
+                        Criada: ${k.criadaEm}
+                    </div>
+                `;
+            });
+            
+            lista.innerHTML = html;
+        }
+        
+        function limparKeys() {
+            if (confirm('TEM CERTEZA QUE DESEJA APAGAR TODAS AS KEYS?\nIsso removerá o acesso de todos os admins!')) {
+                localStorage.removeItem('adminKeys');
+                alert('Todas as keys foram removidas!');
+                carregarKeys();
+            }
+        }
+        
+        // Carregar keys ao abrir a página
+        window.onload = carregarKeys;
+    </script>
+</body>
+</html>

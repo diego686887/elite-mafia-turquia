@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Mafia - Perguntas</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔱 CANDIDATURA ELITE - PERGUNTAS</h1>
+        </header>
+        
+        <main class="content">
+            <div id="treinoInfo" class="treino-info">
+                <h3>📅 DATA DO TREINO:</h3>
+                <p id="dataTreino">Carregando...</p>
+                <p id="horaTreino"></p>
+            </div>
+            
+            <form id="formPerguntas">
+                <div class="form-group">
+                    <label for="motivacao">POR QUE QUER ENTRAR NA ELITE?</label>
+                    <textarea id="motivacao" required placeholder="Descreva suas razões..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label>VOCÊ É BOM NO P1?</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="p1_sim" name="p1" value="sim" required>
+                            <label for="p1_sim">SIM</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="p1_nao" name="p1" value="nao">
+                            <label for="p1_nao">NÃO</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>VOCÊ É BOM NOS TIROS?</label>
+                    <div class="radio-group">
+                        <div class="radio-option">
+                            <input type="radio" id="tiros_sim" name="tiros" value="sim" required>
+                            <label for="tiros_sim">SIM</label>
+                        </div>
+                        <div class="radio-option">
+                            <input type="radio" id="tiros_nao" name="tiros" value="nao">
+                            <label for="tiros_nao">NÃO</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="btn-container">
+                    <button type="button" onclick="voltar()" class="btn">VOLTAR</button>
+                    <button type="submit" class="btn">CONFIRMAR TREINO</button>
+                </div>
+            </form>
+        </main>
+    </div>
+    
+    <!-- Modal de Confirmação -->
+    <div id="modalConfirmacao" class="modal">
+        <div class="modal-content">
+            <h3>CONFIRMAR PARTICIPAÇÃO</h3>
+            <p id="textoConfirmacao"></p>
+            <p class="warning">⚠️ ATENÇÃO: Após confirmar, não será possível alterar!</p>
+            <div class="btn-container">
+                <button onclick="rejeitarTreino()" class="btn">NÃO CONCORDO</button>
+                <button onclick="confirmarTreino()" class="btn">CONFIRMAR</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/treino.js"></script>
+    <script>
+        // Carregar data do treino
+        function carregarTreinoInfo() {
+            const treinoData = localStorage.getItem('treinoData');
+            if (treinoData) {
+                const treino = JSON.parse(treinoData);
+                document.getElementById('dataTreino').textContent = `Data: ${treino.data}`;
+                document.getElementById('horaTreino').textContent = `Horário: ${treino.hora}`;
+            } else {
+                // Data padrão
+                document.getElementById('dataTreino').textContent = 'Data: 15/03/2024';
+                document.getElementById('horaTreino').textContent = 'Horário: 20:00';
+            }
+        }
+        
+        function voltar() {
+            window.location.href = 'candidatura.html';
+        }
+        
+        document.getElementById('formPerguntas').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const p1 = document.querySelector('input[name="p1"]:checked').value;
+            const tiros = document.querySelector('input[name="tiros"]:checked').value;
+            const motivacao = document.getElementById('motivacao').value;
+            
+            const treinoData = localStorage.getItem('treinoData');
+            const treino = treinoData ? JSON.parse(treinoData) : {data: '15/03/2024', hora: '20:00'};
+            
+            // Mostrar modal
+            document.getElementById('textoConfirmacao').textContent = 
+                `Você realmente concorda com o treino no dia ${treino.data} às ${treino.hora}?`;
+            document.getElementById('modalConfirmacao').style.display = 'flex';
+            
+            // Salvar perguntas temporariamente
+            const perguntas = {p1, tiros, motivacao};
+            localStorage.setItem('candidatoPerguntas', JSON.stringify(perguntas));
+        });
+        
+        function confirmarTreino() {
+            // Fechar modal
+            document.getElementById('modalConfirmacao').style.display = 'none';
+            
+            // Salvar candidatura completa
+            const dados = JSON.parse(localStorage.getItem('candidatoDados'));
+            const perguntas = JSON.parse(localStorage.getItem('candidatoPerguntas'));
+            
+            if (dados && perguntas) {
+                const candidatura = {
+                    ...dados,
+                    ...perguntas,
+                    dataCandidatura: new Date().toLocaleString('pt-BR'),
+                    status: 'Pendente'
+                };
+                
+                // Salvar no histórico
+                let candidaturas = JSON.parse(localStorage.getItem('candidaturas')) || [];
+                candidaturas.push(candidatura);
+                localStorage.setItem('candidaturas', JSON.stringify(candidaturas));
+                
+                // Limpar dados temporários
+                localStorage.removeItem('candidatoDados');
+                localStorage.removeItem('candidatoPerguntas');
+                
+                // Redirecionar para confirmação
+                window.location.href = 'confirmacao.html';
+            }
+        }
+        
+        function rejeitarTreino() {
+            document.getElementById('modalConfirmacao').style.display = 'none';
+            alert('ATÉ A PRÓXIMA TENTATIVA!');
+            localStorage.removeItem('candidatoDados');
+            localStorage.removeItem('candidatoPerguntas');
+            window.location.href = 'index.html';
+        }
+        
+        // Inicializar
+        carregarTreinoInfo();
+    </script>
+</body>
+</html>

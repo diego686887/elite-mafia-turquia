@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elite Mafia - Área Admin</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔱 ÁREA ADMINISTRATIVA</h1>
+        </header>
+        
+        <main class="content">
+            <div id="loginAdmin" style="display: block;">
+                <h2>ACESSO RESTRITO</h2>
+                <p>Digite a key de administração:</p>
+                
+                <div class="form-group">
+                    <input type="password" id="keyAdmin" placeholder="Digite a key de acesso">
+                </div>
+                
+                <div class="btn-container">
+                    <button onclick="validarKey()" class="btn">ACESSAR</button>
+                    <a href="index.html" class="btn">VOLTAR</a>
+                </div>
+                
+                <p class="warning">⚠️ A key é válida apenas para este dispositivo!</p>
+            </div>
+            
+            <div id="painelAdmin" style="display: none;">
+                <h2>PAINEL DE CONTROLE</h2>
+                
+                <div class="admin-panel">
+                    <h3>📅 AGENDAR TREINO</h3>
+                    <div class="form-group">
+                        <label for="novaData">NOVA DATA:</label>
+                        <input type="date" id="novaData">
+                    </div>
+                    <div class="form-group">
+                        <label for="novaHora">NOVO HORÁRIO:</label>
+                        <input type="time" id="novaHora">
+                    </div>
+                    <button onclick="atualizarTreino()" class="btn">ATUALIZAR TREINO</button>
+                </div>
+                
+                <div class="admin-panel">
+                    <h3>📋 CANDIDATURAS RECENTES</h3>
+                    <div id="listaCandidaturas">
+                        <p>Carregando candidaturas...</p>
+                    </div>
+                    <button onclick="carregarCandidaturas()" class="btn">ATUALIZAR LISTA</button>
+                    <button onclick="exportarCandidaturas()" class="btn">EXPORTAR DADOS</button>
+                </div>
+                
+                <div class="btn-container">
+                    <button onclick="sairAdmin()" class="btn">SAIR</button>
+                    <a href="gerador_keys.html" class="btn">GERAR KEYS</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    
+    <script src="js/admin.js"></script>
+    <script>
+        // Sistema de validação de key
+        function validarKey() {
+            const key = document.getElementById('keyAdmin').value;
+            
+            // Verificar se é uma key válida
+            const keysValidas = JSON.parse(localStorage.getItem('adminKeys')) || [];
+            const deviceId = localStorage.getItem('deviceId') || gerarDeviceId();
+            
+            // Verificar se a key está na lista E se é para este dispositivo
+            const keyValida = keysValidas.find(k => 
+                k.key === key && 
+                (k.deviceId === deviceId || k.deviceId === 'all')
+            );
+            
+            if (keyValida) {
+                // Salvar sessão admin
+                localStorage.setItem('adminLogged', 'true');
+                document.getElementById('loginAdmin').style.display = 'none';
+                document.getElementById('painelAdmin').style.display = 'block';
+                carregarCandidaturas();
+            } else {
+                alert('KEY INVÁLIDA OU NÃO AUTORIZADA PARA ESTE DISPOSITIVO!');
+            }
+        }
+        
+        function gerarDeviceId() {
+            const id = 'device_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('deviceId', id);
+            return id;
+        }
+        
+        // Verificar se já está logado
+        window.onload = function() {
+            if (localStorage.getItem('adminLogged') === 'true') {
+                document.getElementById('loginAdmin').style.display = 'none';
+                document.getElementById('painelAdmin').style.display = 'block';
+                carregarCandidaturas();
+            }
+        };
+        
+        function carregarCandidaturas() {
+            const candidaturas = JSON.parse(localStorage.getItem('candidaturas')) || [];
+            const lista = document.getElementById('listaCandidaturas');
+            
+            if (candidaturas.length === 0) {
+                lista.innerHTML = '<p>Nenhuma candidatura encontrada.</p>';
+                return;
+            }
+            
+            let html = '';
+            candidaturas.forEach((c, index) => {
+                html += `
+                    <div class="candidato-item">
+                        <strong>${c.nome}</strong> (${c.idade} anos)<br>
+                        Discord: ${c.discord} | Roblox: ${c.roblox}<br>
+                        P1: ${c.p1} | Tiros: ${c.tiros}<br>
+                        Data: ${c.dataCandidatura}
+                    </div>
+                `;
+            });
+            
+            lista.innerHTML = html;
+        }
+        
+        function atualizarTreino() {
+            const data = document.getElementById('novaData').value;
+            const hora = document.getElementById('novaHora').value;
+            
+            if (!data || !hora) {
+                alert('Preencha data e hora!');
+                return;
+            }
+            
+            // Formatando data
+            const dataFormatada = new Date(data + 'T' + hora).toLocaleDateString('pt-BR');
+            const horaFormatada = new Date(data + 'T' + hora).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+            
+            const treino = {
+                data: dataFormatada,
+                hora: horaFormatada,
+                atualizadoEm: new Date().toLocaleString('pt-BR')
+            };
+            
+            localStorage.setItem('treinoData', JSON.stringify(treino));
+            alert('Treino atualizado com sucesso!');
+            
+            // Sincronizar com outros dispositivos (simulação)
+            if (localStorage.getItem('syncEnabled') === 'true') {
+                sincronizarTreino(treino);
+            }
+        }
+        
+        function sincronizarTreino(treino) {
+            // Em um sistema real, aqui seria uma API
+            // Por enquanto, apenas log
+            console.log('Sincronizando treino:', treino);
+        }
+        
+        function exportarCandidaturas() {
+            const candidaturas = JSON.parse(localStorage.getItem('candidaturas')) || [];
+            const dados = JSON.stringify(candidaturas, null, 2);
+            
+            const blob = new Blob([dados], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'candidaturas_elite.json';
+            a.click();
+        }
+        
+        function sairAdmin() {
+            localStorage.removeItem('adminLogged');
+            location.reload();
+        }
+    </script>
+</body>
+</html>
