@@ -5,26 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Área Admin</title>
     <link rel="stylesheet" href="estilo.css">
-    <style>
-        /* Adicionar apenas este estilo extra */
-        .sync-info {
-            background: #1a1a1a;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 10px 0;
-            text-align: center;
-            font-size: 14px;
-            color: #0f0;
-        }
-    </style>
 </head>
 <body>
 
 <h1>Área Administrativa</h1>
-
-<div class="sync-info" id="syncStatus">
-    🔄 Sincronizando com dispositivos...
-</div>
 
 <label>Dia e horário do treino:</label>
 <input type="text" id="novoHorario" placeholder="Ex: Sexta às 20:00">
@@ -32,31 +16,9 @@
 
 <h2>Candidatos</h2>
 <p>Total de candidatos: <strong><span id="contador">0</span></strong></p>
-<button onclick="carregarCandidatos()" style="background: #0066cc; margin-bottom: 10px;">
-    ↻ Atualizar Lista
-</button>
 
 <ul id="listaCandidatos"></ul>
 
 <script src="script.js"></script>
-<script>
-// Atualizar status de sincronização
-setInterval(() => {
-    const status = document.getElementById('syncStatus');
-    if (status) {
-        const lastUpdate = localStorage.getItem('ultimaAtualizacao');
-        if (lastUpdate) {
-            const timeAgo = Math.floor((Date.now() - new Date(lastUpdate).getTime()) / 1000);
-            if (timeAgo < 30) {
-                status.innerHTML = '✅ Sincronizado com todos dispositivos';
-                status.style.color = '#0f0';
-            } else {
-                status.innerHTML = '🔄 Última sincronização: ' + Math.floor(timeAgo/60) + ' min atrás';
-                status.style.color = '#ff0';
-            }
-        }
-    }
-}, 5000);
-</script>
 </body>
 </html>
