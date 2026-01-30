@@ -38,6 +38,7 @@ button, .btn {
     background: darkred;
     color: white;
     cursor: pointer;
+    transition: background 0.3s;
 }
 
 .btn {
@@ -52,8 +53,21 @@ button:hover, .btn:hover {
     background: crimson;
 }
 
+/* Estilo específico para botão de atualizar */
+button[onclick="carregarCandidatos()"] {
+    background: #0066cc;
+    width: auto;
+    display: inline-block;
+    padding: 8px 15px;
+}
+
+button[onclick="carregarCandidatos()"]:hover {
+    background: #0088ff;
+}
+
+/* Estilo para lista de candidatos */
 ul {
-    max-width: 600px;
+    max-width: 800px;
     margin: auto;
     padding: 0;
 }
@@ -61,14 +75,46 @@ ul {
 li {
     list-style: none;
     background: #1a1a1a;
-    margin: 6px 0;
-    padding: 10px;
-    border-radius: 6px;
+    margin: 10px 0;
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid darkred;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+li div {
+    flex-grow: 1;
+}
+
+/* Botão excluir dentro da lista */
+li button {
+    width: auto;
+    padding: 8px 15px;
+    margin: 0;
+    font-size: 14px;
+    background: #8B0000;
+}
+
+li button:hover {
+    background: #FF0000;
 }
 
 /* MOBILE */
 @media (max-width: 600px) {
     h1 {
         font-size: 22px;
+    }
+    
+    li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    li button {
+        width: 100%;
+        margin-top: 10px;
     }
 }
